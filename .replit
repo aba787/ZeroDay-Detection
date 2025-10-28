@@ -19,7 +19,7 @@ deploymentTarget = "cloudrun"
 expertMode = true
 
 [workflows]
-runButton = "Run Detection"
+runButton = "Run Dashboard"
 
 [[workflows.workflow]]
 name = "Run Detection"

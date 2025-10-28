@@ -171,7 +171,7 @@ def supervised_classification(X, y):
     target_names = le_target.classes_
     print(classification_report(y_test, best_model[2], target_names=target_names))
     
-    return best_model[1], scaler, le_target, (X_test, y_test, best_model[2]), results
+    return best_model[1], scaler, le_target, (X_test, y_test, best_model[2])
 
 def visualize_results(anomaly_labels, y_true=None, y_pred=None):
     """Create visualizations of the results"""
