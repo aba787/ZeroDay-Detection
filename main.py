@@ -101,7 +101,7 @@ def supervised_classification(X, y):
         print("\nNo labels available for supervised learning")
         return None, None, None, None
     
-    print("\n=== Supervised Classification ===")
+    print("\n=== Supervised Classification Comparison ===")
     
     # Encode target variable
     le_target = LabelEncoder()
@@ -117,19 +117,61 @@ def supervised_classification(X, y):
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
     
-    # Train Random Forest
-    rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
-    rf_model.fit(X_train_scaled, y_train)
+    # Initialize models for comparison
+    from sklearn.svm import SVC
+    from sklearn.naive_bayes import GaussianNB
+    from sklearn.linear_model import LogisticRegression
     
-    # Make predictions
-    y_pred = rf_model.predict(X_test_scaled)
+    models = {
+        'Random Forest': RandomForestClassifier(n_estimators=100, random_state=42),
+        'SVM': SVC(kernel='rbf', random_state=42),
+        'Logistic Regression': LogisticRegression(random_state=42, max_iter=1000),
+        'Naive Bayes': GaussianNB()
+    }
     
-    # Print results
-    print("\nClassification Report:")
+    results = {}
+    best_model = None
+    best_score = 0
+    
+    print("\nModel Comparison Results:")
+    print("-" * 60)
+    
+    for name, model in models.items():
+        # Train model
+        model.fit(X_train_scaled, y_train)
+        y_pred = model.predict(X_test_scaled)
+        
+        # Calculate metrics
+        from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+        accuracy = accuracy_score(y_test, y_pred)
+        precision = precision_score(y_test, y_pred, average='weighted')
+        recall = recall_score(y_test, y_pred, average='weighted')
+        f1 = f1_score(y_test, y_pred, average='weighted')
+        
+        results[name] = {
+            'accuracy': accuracy,
+            'precision': precision,
+            'recall': recall,
+            'f1_score': f1,
+            'model': model,
+            'predictions': y_pred
+        }
+        
+        print(f"{name:20} | Acc: {accuracy:.3f} | Prec: {precision:.3f} | Rec: {recall:.3f} | F1: {f1:.3f}")
+        
+        # Track best model
+        if f1 > best_score:
+            best_score = f1
+            best_model = (name, model, y_pred)
+    
+    print(f"\nBest Model: {best_model[0]} (F1-Score: {best_score:.3f})")
+    
+    # Detailed report for best model
+    print(f"\nDetailed Classification Report for {best_model[0]}:")
     target_names = le_target.classes_
-    print(classification_report(y_test, y_pred, target_names=target_names))
+    print(classification_report(y_test, best_model[2], target_names=target_names))
     
-    return rf_model, scaler, le_target, (X_test, y_test, y_pred)
+    return best_model[1], scaler, le_target, (X_test, y_test, best_model[2]), results
 
 def visualize_results(anomaly_labels, y_true=None, y_pred=None):
     """Create visualizations of the results"""
@@ -212,8 +254,30 @@ def main():
     results_df.to_csv('detection_results.csv', index=False)
     print(f"\nResults saved to 'detection_results.csv'")
     
+    # Generate comprehensive research report
+    try:
+        from generate_report import generate_research_report, create_performance_visualizations
+        
+        # Generate report
+        if test_results and 'results' in locals():
+            report = generate_research_report(anomaly_labels, test_results, results)
+            create_performance_visualizations(results)
+        else:
+            report = generate_research_report(anomaly_labels, test_results)
+        
+        print("📄 Research report generated successfully!")
+    except Exception as e:
+        print(f"Report generation failed: {e}")
+    
     print("\n🎯 Detection Complete!")
-    print("Upload your dataset (UNSW-NB15.csv or CICIDS2017.csv) for better results.")
+    print("📁 Files generated:")
+    print("  - detection_results.csv (البيانات والنتائج)")
+    print("  - detection_results.png (المخططات)")
+    print("  - research_report.md (تقرير البحث)")
+    print("  - model_comparison.png (مقارنة النماذج)")
+    print("\n💡 لتشغيل لوحة التحكم التفاعلية:")
+    print("  streamlit run app.py")
+    print("\nUpload your dataset (UNSW-NB15.csv or CICIDS2017.csv) for better results.")
 
 if __name__ == "__main__":
     main()
