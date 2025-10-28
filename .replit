@@ -17,3 +17,15 @@ deploymentTarget = "cloudrun"
 
 [agent]
 expertMode = true
+
+[workflows]
+runButton = "Run Detection"
+
+[[workflows.workflow]]
+name = "Run Detection"
+author = 46282751
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python main.py"

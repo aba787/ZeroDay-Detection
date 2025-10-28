@@ -1,0 +1,148 @@
+🎯 Final Project Title Options (اختاري واحد بناءً على تركيزك):
+
+Using Machine Learning to Detect Zero-Day Network Attacks ← محدد وواضح.
+
+AI-Based Approaches for Detecting Zero-Day Attacks ← أعمّ (كويس لو بتضيفين مقارنة بين ML وDL).
+
+Intelligent Detection of Zero-Day Network Threats Using Machine Learning ← صيغة أكاديمية ممتازة.
+
+🧩 Research Aim (الهدف الرئيسي):
+
+The main aim of this project is to design and evaluate a machine learning–based system capable of detecting zero-day attacks by learning normal and abnormal network traffic patterns. The goal is to enhance early threat detection beyond traditional signature-based intrusion detection systems.
+
+❓ Research Questions:
+
+How can machine learning models effectively detect unknown or zero-day attacks in network traffic?
+
+Which ML algorithms (e.g., Isolation Forest, Random Forest, Autoencoder) achieve the best performance in identifying anomalous network behavior?
+
+How does the model’s performance compare when applied to multiple datasets?
+
+💡 Research Problem (المشكلة):
+
+Traditional intrusion detection systems (IDS) rely on signature-based techniques, which fail to detect unknown or zero-day attacks because they depend on previously known attack patterns. This creates a critical security gap where organizations remain vulnerable to new and unseen threats.
+
+⚠️ Research Gap:
+
+Most existing research focuses on detecting known attacks using supervised learning or rule-based systems. However, there’s still limited focus on detecting unseen zero-day attacks using unsupervised or semi-supervised ML techniques that can generalize to new threats without labeled data.
+
+🧠 Purpose of the Project:
+
+To build a system that:
+
+Learns from network traffic patterns (normal vs. abnormal).
+
+Detects new and unknown attacks in real-time or near real-time.
+
+Evaluates and compares the performance of different ML techniques for anomaly detection.
+
+Provides an interpretable output (dashboard or alert system) for users.
+
+📊 Dataset Plan:
+Dataset Type:
+
+Network flow data — typically includes:
+
+Source/Destination IP
+
+Port numbers
+
+Protocol type
+
+Packet count, size, timing
+
+Duration, bytes in/out
+
+Possible Datasets to Use:
+
+UNSW-NB15 — modern dataset simulating real-world attacks (recommended).
+
+CICIDS2017 or CICIDS2018 — detailed, labeled datasets for various network intrusions.
+
+NSL-KDD — older, smaller dataset (good for model testing and comparisons).
+
+You can use 2–3 datasets for comparison (as المشرفة قالت: “كل ما كان أكثر كان أفضل”).
+
+Data Source:
+
+All datasets are publicly available and anonymized (non-identifiable data) → compliant with ethical requirements.
+
+⚙️ Methodology (طريقة العمل):
+
+Data Collection:
+Download public network datasets (UNSW-NB15, CICIDS2017).
+
+Data Preprocessing:
+
+Remove duplicates
+
+Normalize numerical features
+
+Encode categorical features (protocols, etc.)
+
+Feature Engineering:
+Create statistical and temporal features (e.g., average packet size, flow duration).
+
+Model Selection:
+Test multiple ML algorithms:
+
+Isolation Forest (unsupervised anomaly detection)
+
+Autoencoder (neural-based)
+
+Random Forest / SVM (supervised baseline)
+
+Model Evaluation:
+Metrics: accuracy, precision, recall, F1-score, ROC-AUC.
+
+Visualization:
+Create a simple dashboard (Matplotlib/Streamlit) showing:
+
+Real-time detection results
+
+Confusion matrix or ROC curve
+
+Reporting:
+Document methodology, results, discussion, and conclusion.
+
+🧩 Why Machine Learning (not DL or Hybrid):
+
+Dataset size: Smaller datasets → ML is more efficient and requires less computational power.
+
+Interpretability: ML models are easier to explain and justify in research (important academically).
+
+Baseline Approach: ML gives a strong, explainable baseline — once validated, DL or hybrid can be future work.
+
+Focus: Your project emphasizes detecting patterns, not training on huge image/video datasets.
+
+You can mention: “Deep learning may outperform ML in large-scale or complex data, but for this project’s scope and dataset size, machine learning offers a more interpretable and practical solution.”
+
+🚀 Future Enhancement Ideas (for discussion):
+
+Integrating hybrid approaches (e.g., combining ML + DL).
+
+Implementing real-time intrusion detection.
+
+Testing on live captured traffic.
+
+Deploying on cloud or simulated IoT networks.
+
+🧾 Ethical Considerations:
+
+Only publicly available, anonymized datasets.
+
+No personal, identifiable, or sensitive data.
+
+Results are used purely for research and educational purposes.
+
+🧭 Expected Deliverables:
+
+Trained ML model(s).
+
+Performance report (comparison table + metrics).
+
+Visualization or dashboard.
+
+Research report (in English).
+
+Short demo video.
