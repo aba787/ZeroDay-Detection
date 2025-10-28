@@ -9,6 +9,10 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
+import os
+
+# Set Streamlit config to avoid email prompt
+os.environ['STREAMLIT_BROWSER_GATHER_USAGE_STATS'] = 'false'
 
 # Configure page
 st.set_page_config(
