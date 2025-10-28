@@ -55,8 +55,12 @@ st.markdown("""
 @st.cache_data
 def load_sample_data():
     """Generate sample network traffic data"""
-    np.random.seed(42)
-    n_samples = 1000
+    try:
+        np.random.seed(42)
+        n_samples = 1000
+    except Exception as e:
+        st.error(f"Error loading data: {e}")
+        return pd.DataFrame()
     
     # Generate timestamps for the last 24 hours
     end_time = datetime.now()
@@ -101,12 +105,13 @@ def detect_anomalies(df):
 
 def main():
     # Professional Header with live status
+    current_time = datetime.now().strftime('%H:%M:%S')
     st.markdown(f'''
     <div style="text-align: center; padding: 20px; background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%); border-radius: 10px; margin-bottom: 30px;">
         <h1 style="color: white; font-size: 2.5rem; margin: 0;">🔒 Zero-Day Attack Detection System</h1>
         <p style="color: #e0e0e0; font-size: 1.2rem; margin: 10px 0 0 0;">Advanced ML-Based Network Security Monitor</p>
         <div style="background: #28a745; color: white; padding: 5px 15px; border-radius: 20px; display: inline-block; margin-top: 10px;">
-            🟢 SYSTEM ACTIVE - Last Updated: {datetime.now().strftime('%H:%M:%S')}
+            🟢 SYSTEM ACTIVE - Last Updated: {current_time}
         </div>
     </div>
     ''', unsafe_allow_html=True)
@@ -341,11 +346,11 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
-    # Auto-refresh
-    if refresh_rate == "Real-time":
-        import time
-        time.sleep(2)  # Slightly slower refresh to prevent overwhelming
-        st.rerun()
+    # Auto-refresh (disabled for production deployment)
+    # if refresh_rate == "Real-time":
+    #     import time
+    #     time.sleep(2)
+    #     st.rerun()
 
 if __name__ == "__main__":
     main()
