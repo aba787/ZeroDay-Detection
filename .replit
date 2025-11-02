@@ -12,7 +12,7 @@ language = "python3"
 requiredFiles = [".replit", "replit.nix"]
 
 [deployment]
-run = ["sh", "-c", "python -c 'import streamlit; print(\"Streamlit ready\")' && streamlit run app.py --server.address=0.0.0.0 --server.port=$PORT --server.headless=true --server.enableCORS=false --server.enableWebsocketCompression=false --browser.gatherUsageStats=false --logger.level=error --server.maxUploadSize=50 --global.disableWatchdogWarning=true --client.caching=false"]
+run = ["sh", "-c", "streamlit run app.py --server.address 0.0.0.0 --server.port $PORT --server.headless true --server.enableCORS false --browser.gatherUsageStats false --logger.level error"]
 deploymentTarget = "cloudrun"
 
 [[ports]]

@@ -1,0 +1,72 @@
+Using Machine Learning to Detect Malicious or Vulnerable Software Behavior
+
+Main Research Focus:
+
+The project aims to develop a machine learning model that can analyze software behavior or code features to detect whether a program is normal, vulnerable, or potentially malicious.
+
+Purpose of the Project:
+
+The purpose is to create a lightweight, intelligent system that can identify suspicious or unsafe software automatically — without relying on traditional rule-based or signature-based scanners.
+This supports early threat detection and improves software security assessment.
+
+Why Machine Learning (not Deep Learning or Hybrid):
+
+Machine Learning (ML) is chosen because:
+ • It works well with small or structured datasets (like software metrics or static features).
+ • It requires less computational power and time to train compared to Deep Learning.
+ • It offers clear interpretability — important for understanding why a program is flagged.
+Hybrid or Deep approaches are heavier, less explainable, and not necessary at the proof-of-concept stage.
+
+Data Source:
+
+The project will use publicly available software datasets, such as:
+ • The Malware Analysis Dataset or Microsoft Malware Classification Challenge (open datasets).
+ • Custom small samples of open-source software collected from GitHub for testing.
+
+All data will be non-identifiable, meaning no personal or sensitive information will be used.
+
+Type of Data:
+ • Static software features (file size, entropy, number of functions, API calls, imports).
+ • Behavior metrics if dynamic samples are used (CPU usage, system calls, memory patterns).
+
+Data Preparation Steps:
+ 1. Data cleaning (removing duplicates or corrupted samples).
+ 2. Feature extraction and normalization.
+ 3. Labeling (Normal / Vulnerable / Malicious).
+ 4. Splitting into training and testing sets.
+
+Type of Analysis:
+ • Statistical and Predictive Analysis using ML algorithms such as:
+ • Random Forest
+ • Support Vector Machine (SVM)
+ • Isolation Forest (for anomaly detection)
+ • Evaluation using accuracy, precision, recall, and AUC.
+
+Research Problem:
+
+Traditional antivirus or rule-based systems fail to detect new or modified malware variants.
+There’s a growing need for intelligent models that can generalize from known patterns to identify new threats automatically.
+
+Research Gap:
+
+Most current tools depend on large datasets and Deep Learning, which are complex and resource-heavy.
+This project focuses on a lighter ML-based detection model that balances efficiency, interpretability, and detection accuracy — suitable for small labs or local systems.
+
+Expected Output:
+ • A trained ML model to classify software samples (Normal / Malicious / Vulnerable).
+ • A small demo interface showing classification results.
+ • A performance report comparing ML algorithms.
+ • Final documentation summarizing findings.
+
+بالعربي
+ • المشروع عنوانه تحليل البرمجيات باستخدام ML للكشف عن السلوك الخبيث أو الثغرات.
+ • هدفك تبنين نموذج يتعلم من بيانات البرامج (زي الاستدعاءات، حجم الملف، الدوال…) ويقرر إذا البرنامج آمن أو لا.
+ • اخترت Machine Learning لأن:
+ • البيانات صغيرة ومهيكلة (مو صور ولا أصوات).
+ • سهل التدريب وسريع.
+ • يعطيك نتائج قابلة للتفسير.
+ • Deep Learning وHybrid تحتاج وقت وطاقة معالجة ضخمة بدون ضرورة في هذا النوع من التحليل.
+ • البيانات بتكون عامة من الإنترنت (زي GitHub أو Kaggle).
+ • ما فيها أي بيانات حساسة أو شخصية.
+ • التحليل بيكون إحصائي وتنبؤي (تصنيف البرامج).
+ • الفجوة البحثية إن أغلب الأدوات معقدة أو غير قابلة للتفسير، وإنتِ بتسوين نموذج خفيف وذكي وسهل الفهم
