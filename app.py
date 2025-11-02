@@ -9,9 +9,13 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 import os
+import logging
 
 # Set Streamlit config to avoid email prompt
 os.environ['STREAMLIT_BROWSER_GATHER_USAGE_STATS'] = 'false'
+
+# Suppress warnings
+logging.getLogger().setLevel(logging.ERROR)
 
 # Configure page
 st.set_page_config(
@@ -352,4 +356,10 @@ def main():
     #     st.rerun()
 
 if __name__ == "__main__":
-    main()
+    import sys
+    # Ensure proper error handling
+    try:
+        main()
+    except Exception as e:
+        st.error(f"Application Error: {str(e)}")
+        sys.exit(1)
