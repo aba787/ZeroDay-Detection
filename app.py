@@ -1,15 +1,36 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.ensemble import IsolationForest
-from sklearn.preprocessing import StandardScaler, LabelEncoder
-import plotly.express as px
-import plotly.graph_objects as go
 from datetime import datetime, timedelta
 import os
 import logging
+
+# Lazy imports for heavy libraries
+matplotlib = None
+seaborn = None
+IsolationForest = None
+StandardScaler = None
+LabelEncoder = None
+px = None
+go = None
+
+def load_heavy_imports():
+    """Load heavy libraries only when needed"""
+    global matplotlib, seaborn, IsolationForest, StandardScaler, LabelEncoder, px, go
+    if matplotlib is None:
+        import matplotlib.pyplot as plt
+        matplotlib = plt
+        import seaborn as sns
+        seaborn = sns
+        from sklearn.ensemble import IsolationForest as IF
+        from sklearn.preprocessing import StandardScaler as SS, LabelEncoder as LE
+        import plotly.express as pxe
+        import plotly.graph_objects as goe
+        IsolationForest = IF
+        StandardScaler = SS
+        LabelEncoder = LE
+        px = pxe
+        go = goe
 
 # Set Streamlit config to avoid email prompt
 os.environ['STREAMLIT_BROWSER_GATHER_USAGE_STATS'] = 'false'
@@ -59,10 +80,10 @@ st.markdown("""
 
 @st.cache_data
 def load_sample_data():
-    """Generate sample network traffic data"""
+    """Generate sample network traffic data - optimized for faster loading"""
     try:
         np.random.seed(42)
-        n_samples = 1000
+        n_samples = 500  # Reduced sample size for faster startup
     except Exception as e:
         st.error(f"Error loading data: {e}")
         return pd.DataFrame()
@@ -91,6 +112,9 @@ def load_sample_data():
 
 def detect_anomalies(df):
     """Detect anomalies in the network traffic"""
+    # Load heavy libraries only when needed
+    load_heavy_imports()
+    
     # Prepare features for anomaly detection
     feature_cols = ['src_port', 'dst_port', 'packet_count', 'byte_count', 'duration']
     X = df[feature_cols].fillna(0)
@@ -99,8 +123,8 @@ def detect_anomalies(df):
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
 
-    # Apply Isolation Forest
-    iso_forest = IsolationForest(contamination=0.1, random_state=42)
+    # Apply Isolation Forest with fewer estimators for faster processing
+    iso_forest = IsolationForest(contamination=0.1, random_state=42, n_estimators=50)
     anomaly_scores = iso_forest.fit_predict(X_scaled)
 
     df['anomaly_score'] = anomaly_scores
@@ -109,6 +133,13 @@ def detect_anomalies(df):
     return df
 
 def main():
+    # Quick startup check
+    st.write("🚀 Starting Zero-Day Detection System...")
+    
+    # Load heavy imports in background
+    with st.spinner("Loading AI models..."):
+        load_heavy_imports()
+    
     # Professional Header with live status
     current_time = datetime.now().strftime('%H:%M:%S')
     st.markdown(f'''
@@ -231,6 +262,8 @@ def main():
             'is_anomaly': 'sum'
         }).reset_index()
 
+        # Ensure plotly is loaded
+        load_heavy_imports()
         fig = go.Figure()
         fig.add_trace(go.Scatter(
             x=df_hourly['hour'],
