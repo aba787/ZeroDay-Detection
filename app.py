@@ -14,8 +14,10 @@ import logging
 # Set Streamlit config to avoid email prompt
 os.environ['STREAMLIT_BROWSER_GATHER_USAGE_STATS'] = 'false'
 
-# Suppress warnings
+# Suppress warnings and set proper logging for deployment
 logging.getLogger().setLevel(logging.ERROR)
+import warnings
+warnings.filterwarnings('ignore')
 
 # Configure page
 st.set_page_config(
@@ -357,9 +359,20 @@ def main():
 
 if __name__ == "__main__":
     import sys
-    # Ensure proper error handling
+    
+    # Set deployment environment
+    if os.environ.get('PORT'):
+        st.set_option('server.port', int(os.environ.get('PORT')))
+    
+    # Ensure proper error handling for deployment
     try:
         main()
+    except KeyboardInterrupt:
+        print("Application stopped by user")
+        sys.exit(0)
     except Exception as e:
         st.error(f"Application Error: {str(e)}")
-        sys.exit(1)
+        print(f"Error: {str(e)}")
+        # Don't exit in deployment, just show error
+        if not os.environ.get('PORT'):
+            sys.exit(1)
