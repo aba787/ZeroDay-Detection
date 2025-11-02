@@ -284,7 +284,7 @@ def main():
         }).round(2)
 
         st.subheader("Protocol Statistics")
-        st.dataframe(protocol_stats, use_container_width=True)
+        st.dataframe(protocol_stats, width="stretch")
 
     with col2:
         # Top suspicious IPs
@@ -305,7 +305,7 @@ def main():
         display_cols = ['timestamp', 'src_ip', 'dst_ip', 'protocol', 'dst_port', 'attack_type']
         st.dataframe(
             recent_anomalies[display_cols],
-            use_container_width=True,
+            width="stretch",
             hide_index=True
         )
     else:
@@ -360,10 +360,6 @@ def main():
 if __name__ == "__main__":
     import sys
     
-    # Set deployment environment
-    if os.environ.get('PORT'):
-        st.set_option('server.port', int(os.environ.get('PORT')))
-    
     # Ensure proper error handling for deployment
     try:
         main()
@@ -373,6 +369,5 @@ if __name__ == "__main__":
     except Exception as e:
         st.error(f"Application Error: {str(e)}")
         print(f"Error: {str(e)}")
-        # Don't exit in deployment, just show error
-        if not os.environ.get('PORT'):
-            sys.exit(1)
+        # Allow graceful error handling in deployment
+        pass
