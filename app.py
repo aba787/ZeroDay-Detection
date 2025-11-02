@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -61,12 +60,12 @@ def load_sample_data():
     except Exception as e:
         st.error(f"Error loading data: {e}")
         return pd.DataFrame()
-    
+
     # Generate timestamps for the last 24 hours
     end_time = datetime.now()
     start_time = end_time - timedelta(hours=24)
     timestamps = [start_time + timedelta(minutes=i*1.44) for i in range(n_samples)]
-    
+
     data = {
         'timestamp': timestamps,
         'src_ip': [f"192.168.{np.random.randint(1,255)}.{np.random.randint(1,255)}" for _ in range(n_samples)],
@@ -81,7 +80,7 @@ def load_sample_data():
         'attack_type': np.random.choice(['Normal', 'DoS', 'Probe', 'Malware', 'Suspicious'], 
                                       n_samples, p=[0.85, 0.05, 0.05, 0.03, 0.02])
     }
-    
+
     return pd.DataFrame(data)
 
 def detect_anomalies(df):
@@ -89,18 +88,18 @@ def detect_anomalies(df):
     # Prepare features for anomaly detection
     feature_cols = ['src_port', 'dst_port', 'packet_count', 'byte_count', 'duration']
     X = df[feature_cols].fillna(0)
-    
+
     # Scale features
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
-    
+
     # Apply Isolation Forest
     iso_forest = IsolationForest(contamination=0.1, random_state=42)
     anomaly_scores = iso_forest.fit_predict(X_scaled)
-    
+
     df['anomaly_score'] = anomaly_scores
     df['is_anomaly'] = anomaly_scores == -1
-    
+
     return df
 
 def main():
@@ -115,10 +114,10 @@ def main():
         </div>
     </div>
     ''', unsafe_allow_html=True)
-    
+
     # Professional Sidebar
     st.sidebar.title("🛠️ Security Control Panel")
-    
+
     # System Status Box
     st.sidebar.markdown("""
     <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
@@ -130,24 +129,24 @@ def main():
         </div>
     </div>
     """, unsafe_allow_html=True)
-    
+
     # Load data
     df = load_sample_data()
     df = detect_anomalies(df)
-    
+
     # Enhanced Sidebar controls
     st.sidebar.subheader("⚙️ Detection Settings")
     refresh_rate = st.sidebar.selectbox("Refresh Rate", ["Real-time", "5 seconds", "30 seconds", "1 minute"])
-    
+
     sensitivity = st.sidebar.slider("🎯 Detection Sensitivity", 0.01, 0.2, 0.1, 0.01, 
                                    help="Higher values detect more anomalies")
-    
+
     time_window = st.sidebar.selectbox("⏰ Time Window", ["Last 1 hour", "Last 6 hours", "Last 24 hours"])
-    
+
     st.sidebar.markdown("---")
     if st.sidebar.button("🔄 Refresh Data", type="primary"):
         st.rerun()
-    
+
     # System Info
     st.sidebar.markdown("""
     <div style="background: #f0f7ff; padding: 10px; border-radius: 5px; margin-top: 20px;">
@@ -160,21 +159,21 @@ def main():
         </small>
     </div>
     """, unsafe_allow_html=True)
-    
+
     # Main dashboard
     col1, col2, col3, col4 = st.columns(4)
-    
+
     total_connections = len(df)
     anomalies_detected = df['is_anomaly'].sum()
     attack_percentage = (anomalies_detected / total_connections) * 100
-    
+
     with col1:
         st.metric(
             label="Total Connections",
             value=f"{total_connections:,}",
             delta=f"+{np.random.randint(10, 50)} from last hour"
         )
-    
+
     with col2:
         st.metric(
             label="Anomalies Detected",
@@ -182,21 +181,21 @@ def main():
             delta=f"+{np.random.randint(1, 10)} from last hour",
             delta_color="inverse"
         )
-    
+
     with col3:
         st.metric(
             label="Attack Rate",
             value=f"{attack_percentage:.2f}%",
             delta=f"{np.random.uniform(-0.5, 0.5):.2f}%"
         )
-    
+
     with col4:
         system_status = "🟢 Normal" if attack_percentage < 5 else "🔴 Alert"
         st.metric(
             label="System Status",
             value=system_status
         )
-    
+
     # Alert section
     if attack_percentage > 5:
         st.markdown("""
@@ -212,12 +211,12 @@ def main():
         All network traffic appears normal. No immediate threats detected.
         </div>
         """, unsafe_allow_html=True)
-    
+
     # Charts section
     st.subheader("📊 Real-Time Analytics")
-    
+
     col1, col2 = st.columns(2)
-    
+
     with col1:
         # Traffic over time - Fixed data aggregation
         df['hour'] = df['timestamp'].dt.hour
@@ -225,7 +224,7 @@ def main():
             'packet_count': 'sum',
             'is_anomaly': 'sum'
         }).reset_index()
-        
+
         fig = go.Figure()
         fig.add_trace(go.Scatter(
             x=df_hourly['hour'],
@@ -242,7 +241,7 @@ def main():
             name='Anomalies Detected',
             marker=dict(color='#DC143C', size=12, symbol='diamond')
         ))
-        
+
         fig.update_layout(
             title="📈 24-Hour Network Traffic Analysis",
             xaxis_title="Hour of Day",
@@ -251,25 +250,25 @@ def main():
             showlegend=True,
             font=dict(size=12)
         )
-        st.plotly_chart(fig, use_container_width=True)
-    
+        st.plotly_chart(fig, width="stretch")
+
     with col2:
         # Attack distribution
         attack_dist = df['attack_type'].value_counts()
-        
+
         fig = px.pie(
             values=attack_dist.values,
             names=attack_dist.index,
             title="Traffic Type Distribution"
         )
         fig.update_layout(height=400)
-        st.plotly_chart(fig, use_container_width=True)
-    
+        st.plotly_chart(fig, width="stretch")
+
     # Protocol analysis
     st.subheader("🔍 Detailed Analysis")
-    
+
     col1, col2 = st.columns(2)
-    
+
     with col1:
         # Protocol breakdown
         protocol_stats = df.groupby('protocol').agg({
@@ -277,25 +276,25 @@ def main():
             'byte_count': 'mean',
             'is_anomaly': 'sum'
         }).round(2)
-        
+
         st.subheader("Protocol Statistics")
         st.dataframe(protocol_stats, use_container_width=True)
-    
+
     with col2:
         # Top suspicious IPs
         suspicious_ips = df[df['is_anomaly']]['src_ip'].value_counts().head(10)
-        
+
         st.subheader("Top Suspicious Source IPs")
         if len(suspicious_ips) > 0:
             st.bar_chart(suspicious_ips)
         else:
             st.info("No suspicious IPs detected")
-    
+
     # Recent alerts table
     st.subheader("🚨 Recent Anomalies")
-    
+
     recent_anomalies = df[df['is_anomaly']].sort_values('timestamp', ascending=False).head(20)
-    
+
     if len(recent_anomalies) > 0:
         display_cols = ['timestamp', 'src_ip', 'dst_ip', 'protocol', 'dst_port', 'attack_type']
         st.dataframe(
@@ -305,12 +304,12 @@ def main():
         )
     else:
         st.info("No recent anomalies detected")
-    
+
     # Export options
     st.subheader("📥 Export Data")
-    
+
     col1, col2 = st.columns(2)
-    
+
     with col1:
         if st.button("Download Full Report"):
             csv = df.to_csv(index=False)
@@ -320,7 +319,7 @@ def main():
                 file_name=f"security_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                 mime="text/csv"
             )
-    
+
     with col2:
         if st.button("Download Anomalies Only"):
             anomalies_csv = df[df['is_anomaly']].to_csv(index=False)
@@ -330,7 +329,7 @@ def main():
                 file_name=f"anomalies_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                 mime="text/csv"
             )
-    
+
     # Professional Footer
     st.markdown("---")
     st.markdown("""
@@ -345,7 +344,7 @@ def main():
         </div>
     </div>
     """, unsafe_allow_html=True)
-    
+
     # Auto-refresh (disabled for production deployment)
     # if refresh_rate == "Real-time":
     #     import time
