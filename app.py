@@ -250,7 +250,7 @@ def main():
             showlegend=True,
             font=dict(size=12)
         )
-        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+        st.plotly_chart(fig, config={'displayModeBar': False})
 
     with col2:
         # Attack distribution
@@ -262,7 +262,7 @@ def main():
             title="Traffic Type Distribution"
         )
         fig.update_layout(height=400)
-        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+        st.plotly_chart(fig, config={'displayModeBar': False})
 
     # Protocol analysis
     st.subheader("🔍 Detailed Analysis")
