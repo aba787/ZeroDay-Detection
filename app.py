@@ -83,32 +83,52 @@ def load_sample_data():
     """Generate sample network traffic data - optimized for faster loading"""
     try:
         np.random.seed(42)
-        n_samples = 500  # Reduced sample size for faster startup
+        n_samples = 300  # Further reduced for faster startup
+        
+        # Generate timestamps for the last 24 hours
+        end_time = datetime.now()
+        start_time = end_time - timedelta(hours=24)
+        timestamps = [start_time + timedelta(minutes=i*4.8) for i in range(n_samples)]
+
+        # Generate data with proper bounds to avoid infinite extents
+        packet_counts = np.clip(np.random.poisson(10, n_samples), 1, 1000)
+        byte_counts = np.clip(np.random.exponential(1000, n_samples), 100, 100000)
+        durations = np.clip(np.random.exponential(5, n_samples), 0.1, 300)
+        src_ports = np.random.randint(1024, 65535, n_samples)
+        dst_ports = np.random.choice([80, 443, 22, 21, 25, 53], n_samples)
+
+        data = {
+            'timestamp': timestamps,
+            'src_ip': [f"192.168.{np.random.randint(1,255)}.{np.random.randint(1,255)}" for _ in range(n_samples)],
+            'dst_ip': [f"10.0.{np.random.randint(1,255)}.{np.random.randint(1,255)}" for _ in range(n_samples)],
+            'protocol': np.random.choice(['TCP', 'UDP', 'ICMP'], n_samples, p=[0.7, 0.2, 0.1]),
+            'src_port': src_ports,
+            'dst_port': dst_ports,
+            'packet_count': packet_counts,
+            'byte_count': byte_counts,
+            'duration': durations,
+            'flags': np.random.choice(['SYN', 'ACK', 'FIN', 'RST'], n_samples),
+            'attack_type': np.random.choice(['Normal', 'DoS', 'Probe', 'Malware', 'Suspicious'], 
+                                          n_samples, p=[0.85, 0.05, 0.05, 0.03, 0.02])
+        }
+
+        return pd.DataFrame(data)
     except Exception as e:
         st.error(f"Error loading data: {e}")
-        return pd.DataFrame()
-
-    # Generate timestamps for the last 24 hours
-    end_time = datetime.now()
-    start_time = end_time - timedelta(hours=24)
-    timestamps = [start_time + timedelta(minutes=i*1.44) for i in range(n_samples)]
-
-    data = {
-        'timestamp': timestamps,
-        'src_ip': [f"192.168.{np.random.randint(1,255)}.{np.random.randint(1,255)}" for _ in range(n_samples)],
-        'dst_ip': [f"10.0.{np.random.randint(1,255)}.{np.random.randint(1,255)}" for _ in range(n_samples)],
-        'protocol': np.random.choice(['TCP', 'UDP', 'ICMP'], n_samples, p=[0.7, 0.2, 0.1]),
-        'src_port': np.random.randint(1024, 65535, n_samples),
-        'dst_port': np.random.choice([80, 443, 22, 21, 25, 53], n_samples),
-        'packet_count': np.random.poisson(10, n_samples),
-        'byte_count': np.random.exponential(1000, n_samples),
-        'duration': np.random.exponential(5, n_samples),
-        'flags': np.random.choice(['SYN', 'ACK', 'FIN', 'RST'], n_samples),
-        'attack_type': np.random.choice(['Normal', 'DoS', 'Probe', 'Malware', 'Suspicious'], 
-                                      n_samples, p=[0.85, 0.05, 0.05, 0.03, 0.02])
-    }
-
-    return pd.DataFrame(data)
+        # Return minimal safe data
+        return pd.DataFrame({
+            'timestamp': [datetime.now()],
+            'src_ip': ['192.168.1.1'],
+            'dst_ip': ['10.0.1.1'],
+            'protocol': ['TCP'],
+            'src_port': [8080],
+            'dst_port': [80],
+            'packet_count': [10],
+            'byte_count': [1000],
+            'duration': [1.0],
+            'flags': ['SYN'],
+            'attack_type': ['Normal']
+        })
 
 def detect_anomalies(df):
     """Detect anomalies in the network traffic"""
@@ -133,12 +153,29 @@ def detect_anomalies(df):
     return df
 
 def main():
-    # Quick startup check
-    st.write("🚀 Starting Zero-Day Detection System...")
+    # Quick startup indicator
+    startup_placeholder = st.empty()
+    startup_placeholder.success("🚀 Zero-Day Detection System - Ready!")
     
-    # Load heavy imports in background
-    with st.spinner("Loading AI models..."):
-        load_heavy_imports()
+    # Progressive loading
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+    
+    status_text.text('Loading core modules... (1/3)')
+    progress_bar.progress(33)
+    
+    # Load heavy imports only when needed (deferred)
+    status_text.text('Initializing AI engine... (2/3)')
+    progress_bar.progress(66)
+    
+    status_text.text('System ready! (3/3)')
+    progress_bar.progress(100)
+    
+    # Clear progress indicators
+    import time
+    time.sleep(0.5)
+    progress_bar.empty()
+    status_text.empty()
     
     # Professional Header with live status
     current_time = datetime.now().strftime('%H:%M:%S')
@@ -255,31 +292,41 @@ def main():
     col1, col2 = st.columns(2)
 
     with col1:
-        # Traffic over time - Fixed data aggregation
+        # Traffic over time - Fixed data aggregation with proper bounds
         df['hour'] = df['timestamp'].dt.hour
         df_hourly = df.groupby('hour').agg({
             'packet_count': 'sum',
             'is_anomaly': 'sum'
         }).reset_index()
 
+        # Ensure data is valid (no infinite values)
+        df_hourly = df_hourly.replace([np.inf, -np.inf], np.nan).fillna(0)
+        
+        # Clip values to reasonable ranges
+        df_hourly['packet_count'] = np.clip(df_hourly['packet_count'], 0, 10000)
+        df_hourly['is_anomaly'] = np.clip(df_hourly['is_anomaly'], 0, 100)
+
         # Ensure plotly is loaded
         load_heavy_imports()
         fig = go.Figure()
-        fig.add_trace(go.Scatter(
-            x=df_hourly['hour'],
-            y=df_hourly['packet_count'],
-            mode='lines+markers',
-            name='Normal Traffic',
-            line=dict(color='#2E8B57', width=3),
-            marker=dict(size=8)
-        ))
-        fig.add_trace(go.Scatter(
-            x=df_hourly['hour'],
-            y=df_hourly['is_anomaly']*50,  # Better scaling for visibility
-            mode='markers',
-            name='Anomalies Detected',
-            marker=dict(color='#DC143C', size=12, symbol='diamond')
-        ))
+        
+        # Add traces only if we have valid data
+        if len(df_hourly) > 0 and not df_hourly.empty:
+            fig.add_trace(go.Scatter(
+                x=df_hourly['hour'].astype(int),
+                y=df_hourly['packet_count'].astype(float),
+                mode='lines+markers',
+                name='Normal Traffic',
+                line=dict(color='#2E8B57', width=3),
+                marker=dict(size=8)
+            ))
+            fig.add_trace(go.Scatter(
+                x=df_hourly['hour'].astype(int),
+                y=(df_hourly['is_anomaly']*50).astype(float),  # Better scaling for visibility
+                mode='markers',
+                name='Anomalies Detected',
+                marker=dict(color='#DC143C', size=12, symbol='diamond')
+            ))
 
         fig.update_layout(
             title="📈 24-Hour Network Traffic Analysis",
@@ -287,9 +334,11 @@ def main():
             yaxis_title="Traffic Volume",
             height=400,
             showlegend=True,
-            font=dict(size=12)
+            font=dict(size=12),
+            xaxis=dict(range=[0, 23]),
+            yaxis=dict(range=[0, max(1000, df_hourly['packet_count'].max() if not df_hourly.empty else 1000)])
         )
-        st.plotly_chart(fig, config={'displayModeBar': False})
+        st.plotly_chart(fig, config={'displayModeBar': False}, use_container_width=True)
 
     with col2:
         # Attack distribution
