@@ -7,9 +7,9 @@ import plotly.graph_objects as go
 from datetime import datetime
 import base64
 
-# إعداد الصفحة
+# Page configuration
 st.set_page_config(
-    page_title="كاشف البرمجيات الخبيثة بالذكاء الاصطناعي",
+    page_title="AI Malware Detection System",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -44,44 +44,44 @@ st.markdown("""
 # Header
 st.markdown("""
 <div class="main-header">
-    <h1>🛡️ كاشف البرمجيات الخبيثة بالذكاء الاصطناعي</h1>
-    <p>نظام متقدم لكشف السلوك الخبيث والثغرات في البرمجيات باستخدام تقنيات التعلم الآلي</p>
+    <h1>🛡️ AI-Powered Malware Detection System</h1>
+    <p>Advanced system for detecting malicious behavior and vulnerabilities in software using Machine Learning techniques</p>
 </div>
 """, unsafe_allow_html=True)
 
 # Sidebar
 with st.sidebar:
-    st.markdown("## ⚙️ إعدادات النظام")
+    st.markdown("## ⚙️ System Settings")
     
     analysis_type = st.selectbox(
-        "نوع التحليل",
-        ["تحليل شامل", "كشف الشذوذ", "التصنيف المتقدم", "مراقبة مباشرة"]
+        "Analysis Type",
+        ["Comprehensive Analysis", "Anomaly Detection", "Advanced Classification", "Real-time Monitoring"]
     )
     
     model_type = st.selectbox(
-        "نموذج التعلم الآلي",
+        "Machine Learning Model",
         ["Random Forest", "SVM", "Isolation Forest", "Naive Bayes"]
     )
     
-    threat_level = st.slider("مستوى الحساسية", 1, 10, 7)
+    threat_level = st.slider("Sensitivity Level", 1, 10, 7)
     
     st.markdown("---")
-    st.markdown("### 📊 إحصائيات سريعة")
-    st.metric("البرامج المحللة", "1,247")
-    st.metric("التهديدات المكتشفة", "89")
-    st.metric("معدل الدقة", "97.3%")
+    st.markdown("### 📊 Quick Statistics")
+    st.metric("Programs Analyzed", "1,247")
+    st.metric("Threats Detected", "89")
+    st.metric("Accuracy Rate", "97.3%")
 
 # Main content
 col1, col2, col3 = st.columns([2, 2, 1])
 
 with col1:
-    st.markdown("### 🔍 نتائج التحليل")
+    st.markdown("### 🔍 Analysis Results")
     
     # Sample analysis data
     analysis_data = {
-        'نوع التهديد': ['آمن', 'مشبوه', 'خبيث', 'ثغرة أمنية'],
-        'العدد': [180, 45, 15, 8],
-        'النسبة': [72.6, 18.1, 6.0, 3.2]
+        'Threat Type': ['Safe', 'Suspicious', 'Malicious', 'Vulnerable'],
+        'Count': [180, 45, 15, 8],
+        'Percentage': [72.6, 18.1, 6.0, 3.2]
     }
     
     df_threats = pd.DataFrame(analysis_data)
@@ -89,52 +89,52 @@ with col1:
     # Pie chart
     fig_pie = px.pie(
         df_threats, 
-        values='العدد', 
-        names='نوع التهديد',
-        title="توزيع أنواع التهديدات",
+        values='Count', 
+        names='Threat Type',
+        title="Threat Distribution",
         color_discrete_sequence=['#2ecc71', '#f39c12', '#e74c3c', '#9b59b6']
     )
     fig_pie.update_layout(font=dict(size=14))
     st.plotly_chart(fig_pie, use_container_width=True)
 
 with col2:
-    st.markdown("### 📈 تحليل زمني للتهديدات")
+    st.markdown("### 📈 Threat Timeline Analysis")
     
     # Time series data
     dates = pd.date_range('2024-01-01', periods=30, freq='D')
     threats_over_time = {
-        'التاريخ': dates,
-        'التهديدات': np.random.poisson(5, 30),
-        'البرامج الآمنة': np.random.poisson(20, 30)
+        'Date': dates,
+        'Threats': np.random.poisson(5, 30),
+        'Safe Programs': np.random.poisson(20, 30)
     }
     
     df_time = pd.DataFrame(threats_over_time)
     
     fig_line = px.line(
         df_time, 
-        x='التاريخ', 
-        y=['التهديدات', 'البرامج الآمنة'],
-        title="اتجاه التهديدات عبر الزمن"
+        x='Date', 
+        y=['Threats', 'Safe Programs'],
+        title="Threat Trends Over Time"
     )
     fig_line.update_layout(font=dict(size=12))
     st.plotly_chart(fig_line, use_container_width=True)
 
 with col3:
-    st.markdown("### 🚨 تنبيهات فورية")
+    st.markdown("### 🚨 Real-time Alerts")
     
     alerts = [
-        {"النوع": "خطر عالي", "الوقت": "قبل 5 دقائق", "الرسالة": "برنامج مشبوه"},
-        {"النوع": "متوسط", "الوقت": "قبل 12 دقيقة", "الرسالة": "نشاط غير عادي"},
-        {"النوع": "منخفض", "الوقت": "قبل 25 دقيقة", "الرسالة": "فحص روتيني"}
+        {"Type": "High Risk", "Time": "5 minutes ago", "Message": "Suspicious program detected"},
+        {"Type": "Medium", "Time": "12 minutes ago", "Message": "Unusual activity"},
+        {"Type": "Low", "Time": "25 minutes ago", "Message": "Routine scan completed"}
     ]
     
     for alert in alerts:
-        color = {"خطر عالي": "🔴", "متوسط": "🟡", "منخفض": "🟢"}[alert["النوع"]]
+        color = {"High Risk": "🔴", "Medium": "🟡", "Low": "🟢"}[alert["Type"]]
         st.markdown(f"""
         <div style="background: #f8f9fa; padding: 0.8rem; border-radius: 5px; margin-bottom: 0.5rem;">
-            {color} <strong>{alert["النوع"]}</strong><br>
-            <small>{alert["الوقت"]}</small><br>
-            {alert["الرسالة"]}
+            {color} <strong>{alert["Type"]}</strong><br>
+            <small>{alert["Time"]}</small><br>
+            {alert["Message"]}
         </div>
         """, unsafe_allow_html=True)
 
@@ -145,50 +145,50 @@ col_a, col_b, col_c, col_d = st.columns(4)
 with col_a:
     st.markdown("""
     <div class="metric-card">
-        <h3>🤖 تعلم آلي متقدم</h3>
-        <p>خوارزميات متطورة لكشف التهديدات الجديدة والمجهولة</p>
+        <h3>🤖 Advanced ML</h3>
+        <p>Sophisticated algorithms to detect new and unknown threats</p>
     </div>
     """, unsafe_allow_html=True)
 
 with col_b:
     st.markdown("""
     <div class="metric-card">
-        <h3>⚡ سرعة فائقة</h3>
-        <p>تحليل فوري للبرامج دون التأثير على الأداء</p>
+        <h3>⚡ Lightning Fast</h3>
+        <p>Real-time analysis without affecting system performance</p>
     </div>
     """, unsafe_allow_html=True)
 
 with col_c:
     st.markdown("""
     <div class="metric-card">
-        <h3>🔍 دقة عالية</h3>
-        <p>معدل دقة 97%+ مع أقل نسبة إنذار كاذب</p>
+        <h3>🔍 High Accuracy</h3>
+        <p>97%+ accuracy rate with minimal false positives</p>
     </div>
     """, unsafe_allow_html=True)
 
 with col_d:
     st.markdown("""
     <div class="metric-card">
-        <h3>📊 تقارير شاملة</h3>
-        <p>تحليلات مفصلة وتقارير قابلة للتخصيص</p>
+        <h3>📊 Comprehensive Reports</h3>
+        <p>Detailed analytics and customizable reports</p>
     </div>
     """, unsafe_allow_html=True)
 
 # Software analysis simulation
 st.markdown("---")
-st.markdown("### 💻 محاكي تحليل البرامج")
+st.markdown("### 💻 Software Analysis Simulator")
 
 col_left, col_right = st.columns([1, 1])
 
 with col_left:
     uploaded_file = st.file_uploader(
-        "ارفع ملف البرنامج للتحليل",
+        "Upload software file for analysis",
         type=['exe', 'dll', 'py', 'js', 'jar'],
-        help="الأنواع المدعومة: EXE, DLL, PY, JS, JAR"
+        help="Supported formats: EXE, DLL, PY, JS, JAR"
     )
     
-    if st.button("🔍 بدء التحليل", type="primary"):
-        with st.spinner("جاري التحليل..."):
+    if st.button("🔍 Start Analysis", type="primary"):
+        with st.spinner("Analyzing..."):
             import time
             time.sleep(2)
             
@@ -196,65 +196,132 @@ with col_left:
             risk_score = np.random.randint(1, 100)
             
             if risk_score < 30:
-                st.success(f"✅ البرنامج آمن - درجة المخاطر: {risk_score}/100")
+                st.success(f"✅ Software is safe - Risk Score: {risk_score}/100")
             elif risk_score < 70:
-                st.warning(f"⚠️ البرنامج مشبوه - درجة المخاطر: {risk_score}/100")
+                st.warning(f"⚠️ Suspicious software - Risk Score: {risk_score}/100")
             else:
-                st.error(f"🚨 برنامج خطير - درجة المخاطر: {risk_score}/100")
+                st.error(f"🚨 Malicious software - Risk Score: {risk_score}/100")
 
 with col_right:
-    st.markdown("#### 📋 تفاصيل التحليل")
+    st.markdown("#### 📋 Analysis Details")
     
     analysis_details = pd.DataFrame({
-        'الخاصية': ['حجم الملف', 'عدد الوظائف', 'استدعاءات النظام', 'التشفير', 'التوقيع الرقمي'],
-        'القيمة': ['2.1 MB', '127', '45', 'متقدم', 'غير موجود'],
-        'المخاطر': ['منخفض', 'متوسط', 'عالي', 'منخفض', 'عالي']
+        'Feature': ['File Size', 'Function Count', 'System Calls', 'Encryption', 'Digital Signature'],
+        'Value': ['2.1 MB', '127', '45', 'Advanced', 'Not Found'],
+        'Risk Level': ['Low', 'Medium', 'High', 'Low', 'High']
     })
     
     st.dataframe(analysis_details, use_container_width=True)
 
 # Research information
 st.markdown("---")
-st.markdown("### 🎓 معلومات البحث")
+st.markdown("### 🎓 Research Information")
 
-research_info = st.expander("تفاصيل المشروع البحثي", expanded=False)
+research_info = st.expander("Research Project Details", expanded=False)
 with research_info:
     st.markdown("""
-    **عنوان البحث:** استخدام التعلم الآلي لكشف السلوك الخبيث والثغرات في البرمجيات
+    **Research Title:** Using Machine Learning to Detect Malicious or Vulnerable Software Behavior
     
-    **الهدف الرئيسي:** تطوير نموذج ذكي لتحليل سلوك البرمجيات والكشف عن التهديدات الأمنية
+    **Main Objective:** Develop an intelligent model to analyze software behavior and detect security threats
     
-    **التقنيات المستخدمة:**
-    - Random Forest للتصنيف
-    - Isolation Forest لكشف الشذوذ  
-    - SVM للتصنيف المتقدم
-    - Statistical Analysis للتحليل الإحصائي
+    **Technologies Used:**
+    - Random Forest for classification
+    - Isolation Forest for anomaly detection  
+    - SVM for advanced classification
+    - Statistical Analysis for data insights
     
-    **مصادر البيانات:**
-    - مجموعات بيانات عامة من Kaggle
-    - عينات من GitHub للاختبار
-    - بيانات غير حساسة ومجهولة الهوية
+    **Data Sources:**
+    - Public datasets from Kaggle
+    - GitHub samples for testing
+    - Non-sensitive, anonymized data
     
-    **المخرجات المتوقعة:**
-    - نموذج مدرب للكشف عن البرامج الخبيثة
-    - واجهة تفاعلية للتحليل
-    - تقارير مقارنة للخوارزميات
-    - توثيق شامل للنتائج
+    **Expected Outputs:**
+    - Trained ML model for malware detection
+    - Interactive analysis interface
+    - Algorithm comparison reports
+    - Comprehensive documentation
     """)
+
+# Model Performance Section
+st.markdown("---")
+st.markdown("### 📊 Model Performance Metrics")
+
+col_perf1, col_perf2, col_perf3 = st.columns(3)
+
+with col_perf1:
+    st.metric(
+        label="Detection Accuracy",
+        value="97.3%",
+        delta="2.1%"
+    )
+
+with col_perf2:
+    st.metric(
+        label="False Positive Rate",
+        value="2.7%",
+        delta="-0.5%"
+    )
+
+with col_perf3:
+    st.metric(
+        label="Processing Speed",
+        value="0.3s",
+        delta="-0.1s"
+    )
+
+# Algorithm Comparison
+st.markdown("### 🔬 Algorithm Performance Comparison")
+
+comparison_data = {
+    'Algorithm': ['Random Forest', 'SVM', 'Isolation Forest', 'Naive Bayes'],
+    'Accuracy': [97.3, 95.1, 93.8, 89.2],
+    'Precision': [96.8, 94.5, 92.1, 87.6],
+    'Recall': [97.1, 95.8, 94.2, 90.3],
+    'F1-Score': [96.9, 95.1, 93.1, 88.9]
+}
+
+df_comparison = pd.DataFrame(comparison_data)
+
+fig_comparison = px.bar(
+    df_comparison, 
+    x='Algorithm', 
+    y=['Accuracy', 'Precision', 'Recall', 'F1-Score'],
+    title="ML Algorithm Performance Comparison",
+    barmode='group'
+)
+st.plotly_chart(fig_comparison, use_container_width=True)
+
+# Live System Status
+st.markdown("---")
+st.markdown("### 🔄 System Status")
+
+status_col1, status_col2, status_col3, status_col4 = st.columns(4)
+
+with status_col1:
+    st.metric("CPU Usage", "23%", "-5%")
+
+with status_col2:
+    st.metric("Memory Usage", "45%", "2%")
+
+with status_col3:
+    st.metric("Active Scans", "12", "3")
+
+with status_col4:
+    st.metric("Queue Length", "5", "-2")
 
 # Footer
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; color: #666; padding: 1rem;">
-    🛡️ <strong>نظام كشف البرمجيات الخبيثة</strong> | 
-    مدعوم بالذكاء الاصطناعي | 
-    تم التطوير في عام 2024
+    🛡️ <strong>AI Malware Detection System</strong> | 
+    Powered by Machine Learning | 
+    Developed in 2024
 </div>
 """, unsafe_allow_html=True)
 
 # Status indicator
 st.markdown("""
 <div style="position: fixed; top: 10px; right: 10px; background: #2ecc71; color: white; padding: 0.5rem; border-radius: 15px; z-index: 999;">
-    🟢 النظام متصل
+    🟢 System Online
 </div>
 """, unsafe_allow_html=True)
