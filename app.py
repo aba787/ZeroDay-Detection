@@ -293,7 +293,36 @@ with col_left:
                     # Store results in session state
                     file_name = uploaded_file.name
                     file_size = uploaded_file.size
-                    risk_score = np.random.randint(1, 100)
+                    
+                    # Generate consistent risk score based on file properties (deterministic)
+                    # Using file name and size to ensure same file gives same result
+                    seed_value = hash(file_name + str(file_size)) % 2147483647  # Ensure positive integer
+                    np.random.seed(abs(seed_value))  # Set seed based on file properties
+                    
+                    # Generate risk score (now deterministic for same file)
+                    base_risk = np.random.randint(1, 100)
+                    
+                    # Add file-based risk factors for more realistic assessment
+                    risk_modifiers = 0
+                    
+                    # File extension risk assessment
+                    extension = file_name.split('.')[-1].lower() if '.' in file_name else ''
+                    high_risk_extensions = ['exe', 'scr', 'bat', 'com', 'pif']
+                    medium_risk_extensions = ['dll', 'sys', 'vbs', 'js']
+                    
+                    if extension in high_risk_extensions:
+                        risk_modifiers += 20
+                    elif extension in medium_risk_extensions:
+                        risk_modifiers += 10
+                    
+                    # File size risk assessment
+                    if file_size > 10*1024*1024:  # Files larger than 10MB
+                        risk_modifiers += 15
+                    elif file_size < 1024:  # Very small files
+                        risk_modifiers += 5
+                    
+                    # Calculate final risk score (capped at 100)
+                    risk_score = min(100, base_risk + risk_modifiers)
                     
                     # Determine result status
                     if risk_score < 30:
@@ -338,10 +367,55 @@ with col_right:
     
     if st.session_state.get('analysis_completed', False):
         # Show analysis details when analysis is completed
+        # Generate consistent analysis details based on file properties
+        file_name = st.session_state.file_name
+        file_size = st.session_state.file_size
+        
+        # Use file hash for consistent pseudo-random values
+        seed_value = hash(file_name + str(file_size)) % 2147483647
+        np.random.seed(abs(seed_value))
+        
+        # Generate consistent values based on file
+        function_count = 50 + (hash(file_name) % 200)  # 50-250 functions
+        system_calls = 20 + (hash(str(file_size)) % 80)  # 20-100 calls
+        
+        extension = file_name.split('.')[-1].lower() if '.' in file_name else ''
+        
+        # Determine encryption based on file type and size
+        if extension in ['exe', 'dll'] and file_size > 1024*1024:
+            encryption = 'Advanced'
+            enc_risk = 'Medium'
+        elif extension in ['py', 'js']:
+            encryption = 'None'
+            enc_risk = 'Low'
+        else:
+            encryption = 'Basic'
+            enc_risk = 'Low'
+        
+        # Digital signature based on file type
+        if extension in ['exe', 'dll', 'msi']:
+            signature = 'Present' if (hash(file_name) % 3) == 0 else 'Not Found'
+            sig_risk = 'Low' if signature == 'Present' else 'High'
+        else:
+            signature = 'N/A'
+            sig_risk = 'Low'
+        
         analysis_details = pd.DataFrame({
             'Feature': ['File Size', 'Function Count', 'System Calls', 'Encryption', 'Digital Signature'],
-            'Value': [f'{st.session_state.file_size/1024:.1f} KB', '127', '45', 'Advanced', 'Not Found'],
-            'Risk Level': ['Low', 'Medium', 'High', 'Low', 'High']
+            'Value': [
+                f'{file_size/1024:.1f} KB', 
+                str(function_count), 
+                str(system_calls), 
+                encryption, 
+                signature
+            ],
+            'Risk Level': [
+                'Low' if file_size < 10*1024*1024 else 'Medium',
+                'Low' if function_count < 100 else 'Medium' if function_count < 200 else 'High',
+                'Low' if system_calls < 40 else 'Medium' if system_calls < 70 else 'High',
+                enc_risk,
+                sig_risk
+            ]
         })
         st.dataframe(analysis_details, use_container_width=True)
         
