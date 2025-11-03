@@ -187,48 +187,80 @@ with col_left:
         help="Supported formats: EXE, DLL, PY, JS, JAR"
     )
     
-    if st.button("🔍 Start Analysis", type="primary"):
-        if uploaded_file is None:
-            st.warning("⚠️ No file uploaded! Please upload a software file to analyze.")
-            st.info("💡 The system requires an actual file to perform security analysis. Upload a file above to get started.")
+    # Create two columns for buttons
+    btn_col1, btn_col2 = st.columns([1, 1])
+    
+    with btn_col1:
+        if st.button("🔍 Start Analysis", type="primary"):
+            if uploaded_file is None:
+                st.warning("⚠️ No file uploaded! Please upload a software file to analyze.")
+                st.info("💡 The system requires an actual file to perform security analysis. Upload a file above to get started.")
+            else:
+                with st.spinner("Analyzing uploaded file..."):
+                    import time
+                    time.sleep(2)
+                    
+                    # Store results in session state
+                    file_name = uploaded_file.name
+                    file_size = uploaded_file.size
+                    risk_score = np.random.randint(1, 100)
+                    
+                    st.session_state.analysis_completed = True
+                    st.session_state.file_name = file_name
+                    st.session_state.file_size = file_size
+                    st.session_state.risk_score = risk_score
+    
+    with btn_col2:
+        if st.button("🔄 Reset Results", type="secondary"):
+            # Clear all session state variables
+            for key in list(st.session_state.keys()):
+                if key.startswith('analysis_') or key in ['file_name', 'file_size', 'risk_score']:
+                    del st.session_state[key]
+            st.success("✅ Results cleared successfully!")
+            st.rerun()
+    
+    # Display analysis results if available
+    if st.session_state.get('analysis_completed', False):
+        st.success(f"📁 **File:** {st.session_state.file_name}")
+        st.info(f"📊 **Size:** {st.session_state.file_size:,} bytes")
+        
+        risk_score = st.session_state.risk_score
+        if risk_score < 30:
+            st.success(f"✅ Software is safe - Risk Score: {risk_score}/100")
+        elif risk_score < 70:
+            st.warning(f"⚠️ Suspicious software - Risk Score: {risk_score}/100")
         else:
-            with st.spinner("Analyzing uploaded file..."):
-                import time
-                time.sleep(2)
-                
-                # Analyze the actual uploaded file
-                file_name = uploaded_file.name
-                file_size = uploaded_file.size
-                
-                # Simulate analysis results based on file characteristics
-                risk_score = np.random.randint(1, 100)
-                
-                st.success(f"📁 **File:** {file_name}")
-                st.info(f"📊 **Size:** {file_size:,} bytes")
-                
-                if risk_score < 30:
-                    st.success(f"✅ Software is safe - Risk Score: {risk_score}/100")
-                elif risk_score < 70:
-                    st.warning(f"⚠️ Suspicious software - Risk Score: {risk_score}/100")
-                else:
-                    st.error(f"🚨 Malicious software - Risk Score: {risk_score}/100")
+            st.error(f"🚨 Malicious software - Risk Score: {risk_score}/100")
 
 with col_right:
     st.markdown("#### 📋 Analysis Details")
     
-    if uploaded_file is not None:
-        # Show actual file details when file is uploaded
+    if st.session_state.get('analysis_completed', False):
+        # Show analysis details when analysis is completed
         analysis_details = pd.DataFrame({
             'Feature': ['File Size', 'Function Count', 'System Calls', 'Encryption', 'Digital Signature'],
-            'Value': [f'{uploaded_file.size/1024:.1f} KB', '127', '45', 'Advanced', 'Not Found'],
+            'Value': [f'{st.session_state.file_size/1024:.1f} KB', '127', '45', 'Advanced', 'Not Found'],
             'Risk Level': ['Low', 'Medium', 'High', 'Low', 'High']
         })
-        st.dataframe(analysis_details, width="stretch")
+        st.dataframe(analysis_details, use_container_width=True)
+        
+        # Additional analysis insights
+        st.markdown("**Analysis Status:** ✅ Complete")
+        st.markdown(f"**Risk Assessment:** {st.session_state.risk_score}/100")
+        
+        # Risk level indicator
+        if st.session_state.risk_score < 30:
+            st.markdown("**Threat Level:** 🟢 Low Risk")
+        elif st.session_state.risk_score < 70:
+            st.markdown("**Threat Level:** 🟡 Medium Risk")
+        else:
+            st.markdown("**Threat Level:** 🔴 High Risk")
+            
     else:
-        # Show placeholder when no file is uploaded
-        st.info("📁 **No file uploaded**")
+        # Show placeholder when no analysis is completed
+        st.info("📁 **No analysis completed**")
         st.markdown("""
-        Upload a software file to see:
+        Upload and analyze a software file to see:
         - File size and characteristics
         - Security analysis results
         - Risk assessment details
