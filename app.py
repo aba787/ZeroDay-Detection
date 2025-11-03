@@ -6,6 +6,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
 import base64
+import os
+import csv
 
 # Page configuration
 st.set_page_config(
@@ -14,6 +16,50 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# Function to save analysis to log
+def save_analysis_log(file_name, file_size, risk_score, result_status):
+    """Save analysis results to log.csv file"""
+    log_file = "analysis_log.csv"
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    # Check if log file exists, if not create it with headers
+    file_exists = os.path.exists(log_file)
+    
+    with open(log_file, 'a', newline='', encoding='utf-8') as csvfile:
+        fieldnames = ['Date_Time', 'File_Name', 'File_Size_Bytes', 'Risk_Score', 'Status', 'Threat_Level']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        
+        # Write header if file is new
+        if not file_exists:
+            writer.writeheader()
+        
+        # Determine threat level based on risk score
+        if risk_score < 30:
+            threat_level = "Low Risk"
+        elif risk_score < 70:
+            threat_level = "Medium Risk"
+        else:
+            threat_level = "High Risk"
+        
+        # Write the analysis data
+        writer.writerow({
+            'Date_Time': current_time,
+            'File_Name': file_name,
+            'File_Size_Bytes': file_size,
+            'Risk_Score': risk_score,
+            'Status': result_status,
+            'Threat_Level': threat_level
+        })
+
+# Function to load analysis log
+def load_analysis_log():
+    """Load analysis log from CSV file"""
+    log_file = "analysis_log.csv"
+    if os.path.exists(log_file):
+        return pd.read_csv(log_file)
+    else:
+        return pd.DataFrame(columns=['Date_Time', 'File_Name', 'File_Size_Bytes', 'Risk_Score', 'Status', 'Threat_Level'])
 
 # Custom CSS for better design
 st.markdown("""
@@ -67,9 +113,53 @@ with st.sidebar:
     
     st.markdown("---")
     st.markdown("### 📊 Quick Statistics")
-    st.metric("Programs Analyzed", "1,247")
-    st.metric("Threats Detected", "89")
-    st.metric("Accuracy Rate", "97.3%")
+    
+    # Load analysis log to show real statistics
+    log_df = load_analysis_log()
+    if not log_df.empty:
+        total_analyzed = len(log_df)
+        threats_detected = len(log_df[log_df['Status'].isin(['Suspicious', 'Malicious'])])
+        safe_files = len(log_df[log_df['Status'] == 'Safe'])
+        
+        st.metric("Programs Analyzed", f"{total_analyzed}")
+        st.metric("Threats Detected", f"{threats_detected}")
+        if total_analyzed > 0:
+            accuracy = (safe_files / total_analyzed) * 100
+            st.metric("Safe Files", f"{accuracy:.1f}%")
+    else:
+        st.metric("Programs Analyzed", "0")
+        st.metric("Threats Detected", "0")
+        st.metric("Safe Files", "0%")
+    
+    # Analysis history section
+    st.markdown("---")
+    st.markdown("### 📋 Analysis History")
+    
+    if st.button("🗂️ View Full History"):
+        st.session_state.show_history = True
+    
+    if st.session_state.get('show_history', False):
+        if not log_df.empty:
+            # Show recent 5 analyses
+            recent_analyses = log_df.tail(5).iloc[::-1]  # Reverse to show most recent first
+            
+            st.markdown("**Recent Analyses:**")
+            for _, row in recent_analyses.iterrows():
+                threat_icon = {"Safe": "✅", "Suspicious": "⚠️", "Malicious": "🚨"}
+                icon = threat_icon.get(row['Status'], "❓")
+                
+                st.markdown(f"""
+                <div style="background: #f8f9fa; padding: 0.5rem; border-radius: 5px; margin-bottom: 0.3rem; font-size: 0.8rem;">
+                    {icon} <strong>{row['File_Name']}</strong><br>
+                    Risk: {row['Risk_Score']}/100 | {row['Date_Time']}<br>
+                    Status: {row['Status']}
+                </div>
+                """, unsafe_allow_html=True)
+            
+            if st.button("🗂️ Hide History"):
+                st.session_state.show_history = False
+        else:
+            st.info("No analysis history available yet.")
 
 # Main content
 col1, col2, col3 = st.columns([2, 2, 1])
@@ -204,6 +294,17 @@ with col_left:
                     file_name = uploaded_file.name
                     file_size = uploaded_file.size
                     risk_score = np.random.randint(1, 100)
+                    
+                    # Determine result status
+                    if risk_score < 30:
+                        result_status = "Safe"
+                    elif risk_score < 70:
+                        result_status = "Suspicious"
+                    else:
+                        result_status = "Malicious"
+                    
+                    # Save to log
+                    save_analysis_log(file_name, file_size, risk_score, result_status)
                     
                     st.session_state.analysis_completed = True
                     st.session_state.file_name = file_name
@@ -369,6 +470,59 @@ with status_col3:
 
 with status_col4:
     st.metric("Queue Length", "5", "-2")
+
+# Analysis Log Management Section
+st.markdown("---")
+st.markdown("### 📊 Analysis Log Management")
+
+log_col1, log_col2, log_col3 = st.columns(3)
+
+with log_col1:
+    if st.button("📥 Download Analysis Log"):
+        log_df = load_analysis_log()
+        if not log_df.empty:
+            csv_data = log_df.to_csv(index=False)
+            st.download_button(
+                label="💾 Download CSV File",
+                data=csv_data,
+                file_name=f"analysis_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                mime="text/csv"
+            )
+        else:
+            st.warning("No analysis log data available to download.")
+
+with log_col2:
+    if st.button("📋 View Complete Log"):
+        log_df = load_analysis_log()
+        if not log_df.empty:
+            st.markdown("**Complete Analysis History:**")
+            st.dataframe(log_df.iloc[::-1], use_container_width=True)  # Show most recent first
+            
+            # Statistics summary
+            st.markdown("**Log Summary:**")
+            col_stat1, col_stat2, col_stat3 = st.columns(3)
+            with col_stat1:
+                st.metric("Total Analyses", len(log_df))
+            with col_stat2:
+                threats = len(log_df[log_df['Status'].isin(['Suspicious', 'Malicious'])])
+                st.metric("Threats Found", threats)
+            with col_stat3:
+                if len(log_df) > 0:
+                    avg_risk = log_df['Risk_Score'].mean()
+                    st.metric("Avg Risk Score", f"{avg_risk:.1f}")
+        else:
+            st.info("No analysis log data available.")
+
+with log_col3:
+    if st.button("🗑️ Clear Log", type="secondary"):
+        if st.button("⚠️ Confirm Clear", type="secondary"):
+            log_file = "analysis_log.csv"
+            if os.path.exists(log_file):
+                os.remove(log_file)
+                st.success("✅ Analysis log cleared successfully!")
+                st.rerun()
+            else:
+                st.info("No log file to clear.")
 
 # Footer
 st.markdown("---")
