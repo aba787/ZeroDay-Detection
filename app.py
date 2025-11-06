@@ -490,10 +490,16 @@ with col_left:
     
     with btn_col2:
         if st.button("🔄 Reset Results", type="secondary"):
-            # Clear all session state variables
-            for key in list(st.session_state.keys()):
-                if key.startswith('analysis_') or key in ['file_name', 'file_size', 'risk_score']:
-                    del st.session_state[key]
+            # Clear all session state variables related to analysis
+            keys_to_delete = []
+            for key in st.session_state.keys():
+                if (key.startswith('analysis_') or 
+                    key in ['file_name', 'file_size', 'risk_score', 'hybrid_analysis']):
+                    keys_to_delete.append(key)
+            
+            for key in keys_to_delete:
+                del st.session_state[key]
+            
             st.success("✅ Results cleared successfully!")
             st.rerun()
     
@@ -949,18 +955,19 @@ st.markdown("### 📊 Analysis Log Management")
 log_col1, log_col2, log_col3 = st.columns(3)
 
 with log_col1:
-    if st.button("📥 Download Analysis Log"):
-        log_df = load_analysis_log()
-        if not log_df.empty:
-            csv_data = log_df.to_csv(index=False)
-            st.download_button(
-                label="💾 Download CSV File",
-                data=csv_data,
-                file_name=f"analysis_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                mime="text/csv"
-            )
-        else:
-            st.warning("No analysis log data available to download.")
+    # Load log data first to check if it exists
+    log_df = load_analysis_log()
+    if not log_df.empty:
+        csv_data = log_df.to_csv(index=False)
+        st.download_button(
+            label="📥 Download Analysis Log",
+            data=csv_data,
+            file_name=f"analysis_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+            mime="text/csv",
+            type="primary"
+        )
+    else:
+        st.button("📥 Download Analysis Log", disabled=True, help="No analysis data available")
 
 with log_col2:
     if st.button("📋 View Complete Log"):
@@ -985,15 +992,33 @@ with log_col2:
             st.info("No analysis log data available.")
 
 with log_col3:
-    if st.button("🗑️ Clear Log", type="secondary"):
-        if st.button("⚠️ Confirm Clear", type="secondary"):
-            log_file = "analysis_log.csv"
-            if os.path.exists(log_file):
-                os.remove(log_file)
-                st.success("✅ Analysis log cleared successfully!")
+    # Use session state for confirmation
+    if 'confirm_clear' not in st.session_state:
+        st.session_state.confirm_clear = False
+    
+    if not st.session_state.confirm_clear:
+        if st.button("🗑️ Clear Log", type="secondary"):
+            st.session_state.confirm_clear = True
+            st.rerun()
+    else:
+        st.warning("⚠️ Are you sure you want to clear all analysis logs?")
+        
+        confirm_col1, confirm_col2 = st.columns(2)
+        with confirm_col1:
+            if st.button("✅ Yes, Clear", type="primary"):
+                log_file = "analysis_log.csv"
+                if os.path.exists(log_file):
+                    os.remove(log_file)
+                    st.success("✅ Analysis log cleared successfully!")
+                else:
+                    st.info("No log file to clear.")
+                st.session_state.confirm_clear = False
                 st.rerun()
-            else:
-                st.info("No log file to clear.")
+        
+        with confirm_col2:
+            if st.button("❌ Cancel", type="secondary"):
+                st.session_state.confirm_clear = False
+                st.rerun()
 
 # Footer
 st.markdown("---")
